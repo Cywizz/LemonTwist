@@ -8,8 +8,10 @@ public class LemonSkillUIController : MonoBehaviour
 {
 
     [SerializeField] private Button _skillButton;
+    [SerializeField] private GameObject _selectionFrame;
+    [SerializeField] private LemonSkillsEnum _skill;
 
-    public static Action<LemonSkillsEnum> OnSkillButtonClicked;
+    //public static Action<LemonSkillsEnum> OnSkillButtonClicked;
 
     #region Unity Events
 
@@ -18,6 +20,8 @@ public class LemonSkillUIController : MonoBehaviour
     {
 
         _skillButton.onClick.AddListener(OnSkillClicked);
+
+        _selectionFrame.SetActive(false);
     }
 
    
@@ -25,12 +29,19 @@ public class LemonSkillUIController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if(SkillManager.Instance.SelectedSkill == _skill)
+        {
+            _selectionFrame.SetActive(true);
+        }
+        else
+        {
+            _selectionFrame.SetActive(false);
+        }
     }
 
     private void OnDisable()
     {
-        _skillButton?.onClick.RemoveListener(OnSkillClicked);
+        //_skillButton?.onClick.RemoveListener(OnSkillClicked);
     }
 
     #endregion
@@ -39,9 +50,9 @@ public class LemonSkillUIController : MonoBehaviour
 
     private void OnSkillClicked()
     {
-        OnSkillButtonClicked?.Invoke(LemonSkillsEnum.Blocker);
-        //public Action<string, string, string> OnNotificationReadyToSend;
-        //notificationService.OnNotificationReadyToSend += SendNotice;
+        SkillManager.Instance.SelectedSkill = _skill;
+
+        AudioManager.Instance.PlaySFX(SFXSoundsEnum.ButtonPop);
     }
 
     #endregion

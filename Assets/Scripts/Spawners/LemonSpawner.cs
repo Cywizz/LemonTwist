@@ -7,9 +7,9 @@ public class LemonSpawner : MonoBehaviour
 
     [SerializeField] private GameObject _lemonPrefab;
 
-    [SerializeField] private int _numberLemonsToSpawn;
+    private int _numberLemonsToSpawn;
 
-    [SerializeField] private int _spawnFrequencySeconds;
+    private int _spawnFrequencySeconds;
 
 
     private int _lemonsSpawned;
@@ -19,6 +19,9 @@ public class LemonSpawner : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        _spawnFrequencySeconds = GameManager.Instance._currentLevelDef.SpawnFrequencyInSeconds;
+        _numberLemonsToSpawn = GameManager.Instance.LemonCount;
+
         StartCoroutine(SpawnLemons());
     }
 
@@ -40,6 +43,9 @@ public class LemonSpawner : MonoBehaviour
 
     private IEnumerator SpawnLemons()
     {
+
+        yield return new WaitForSeconds(2f);
+
         _lemonsSpawned = 0;
 
         while (_lemonsSpawned < _numberLemonsToSpawn)
