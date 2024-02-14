@@ -5,20 +5,24 @@ using UnityEngine;
 public class LemonGameController : MonoBehaviour
 {
 
-    [SerializeField] private float _movementSpeed;
-    public GameObject SelectorObject;
-
-    private Rigidbody2D _rb;
-    private EnvironmentCheckController _environmentCheckController;
-
-    private LemonSkillsEnum _currentSkill;
-
+    private float _movementSpeed;    
+    public LemonSkillsEnum CurrentSkill;
     public Vector2 _primaryDirection;
 
+    private Rigidbody2D _rb;
 
-
+    [HideInInspector]
+    public EnvironmentCheckController _environmentCheckController;
     private bool _justSpawned;
     private bool _drowningStarted;
+    private bool _buildingStarted;
+    private bool _diggingStarted;
+    private LemonGameController _lastLemonHit;
+
+    private bool _hasKey;
+    private KeyController _capturedKeyController;
+
+    
 
 
     #region Unity Events
@@ -27,16 +31,18 @@ public class LemonGameController : MonoBehaviour
     {
         _rb = GetComponent<Rigidbody2D>();
         _environmentCheckController = GetComponentInChildren<EnvironmentCheckController>();
+       
 
         _justSpawned = true;
         _drowningStarted = false;
-        _currentSkill = LemonSkillsEnum.None;
+        CurrentSkill = LemonSkillsEnum.None;
         _primaryDirection = Vector2.right;
+        _movementSpeed = GameManager.Instance._currentLevelDef.LemonSpeed;
     }
 
     private void Update()
     {
-
+       
     }
 
     private void FixedUpdate()
@@ -44,24 +50,24 @@ public class LemonGameController : MonoBehaviour
         
 
         //no skill, just walking
-        if (_currentSkill == LemonSkillsEnum.None)
-        {
-            var direction = _primaryDirection;
+        if (CurrentSkill == LemonSkillsEnum.None)
+        {           
+
+            var direction = _primaryDirection;            
+
             var currentPosition = new Vector2(transform.position.x, transform.position.y);
 
             if (_environmentCheckController.IsGrounded)
-            {                
-                //_rb.velocity = new Vector2(direction.x * _movementSpeed, _rb.velocity.y);                
+            {
+                _rb.velocity = new Vector2(direction.x * _movementSpeed, direction.y * _movementSpeed);
 
                 _justSpawned = false;
             }
             else if (_environmentCheckController.IsInWater)
             {
 
-                direction = Vector2.down;
-                _movementSpeed = 1f;
-
-                //_rb.velocity = new Vector2(direction.x * _movementSpeed, _movementSpeed);
+                direction = Vector2.down + _primaryDirection;                
+                _rb.velocity = new Vector2(0, 0.5f);               
 
                 if (_drowningStarted == false) StartDrowningProcess();
             }
@@ -71,66 +77,162 @@ public class LemonGameController : MonoBehaviour
 
                 if (_justSpawned) //makes it jump side ways out of the tree
                 {
-                    direction = Vector2.right;
-                }               
+                    direction = (Vector2.right + Vector2.up) * 0.5f;
 
-                //_rb.velocity = new Vector2(direction.x * _movementSpeed, _rb.velocity.y);
+                    _rb.AddForce(direction, ForceMode2D.Impulse);
+                }
+                else
+                {
+                    _rb.velocity = new Vector2(direction.x * _movementSpeed, direction.y * _movementSpeed);
+
+                }
             }
 
-            _rb.MovePosition(currentPosition + (direction * _movementSpeed * Time.deltaTime));
+            if (_environmentCheckController.IsHittingObstacleToLeft)
+            {
+                _primaryDirection = Vector2.right;
+                
+            }
+
+            if (_environmentCheckController.IsHittingObstacleToRight)
+            {
+                _primaryDirection = Vector2.left;
+                
+            }
+
+
+
+
+
         }
 
-        //blocker skill
-        if(_currentSkill == LemonSkillsEnum.Blocker)
+        //movement and action of different skills
+        if(CurrentSkill == LemonSkillsEnum.Blocker)
         {
             _rb.velocity = Vector2.zero;
         }
-
-    }
-
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if(collision != null)
+        if(CurrentSkill == LemonSkillsEnum.Juicer)
         {
-            var otherLemon = collision.gameObject.GetComponent<LemonGameController>();
-
-            if(otherLemon != null && otherLemon != this)
+            _rb.velocity = Vector2.zero;
+        }
+        if(CurrentSkill == LemonSkillsEnum.Builder)
+        {
+            _rb.velocity = Vector2.zero;
+            if (_buildingStarted == false)
             {
-                if (_currentSkill == LemonSkillsEnum.Blocker)
-                {
-                    otherLemon._primaryDirection = otherLemon._primaryDirection * -1;
-                }
+                _buildingStarted = true;
+                StartCoroutine(StartBuildProcess());
             }
         }
+        if(CurrentSkill == LemonSkillsEnum.Digger)
+        {
+            _rb.velocity = Vector2.zero;
+            if(_diggingStarted == false)
+            {
+                _diggingStarted = true;
+                StartCoroutine(StartDiggingProcess());
+            }
+
+        }
+
     }
+
 
     #endregion
 
     #region Local Members
+
+    private IEnumerator StartDiggingProcess()
+    {
+        yield return new WaitForSeconds(1f);
+
+        SkillManager.Instance.Dig(this);
+    }
+
+   private IEnumerator StartBuildProcess()
+    {
+        yield return new WaitForSeconds(1f);
+                
+        SkillManager.Instance.BuildPlatform(this);
+    }
 
     private void StartDrowningProcess()
     {
         _drowningStarted = true;
         StartCoroutine(StartDrowning());
     }
-
+       
 
     private IEnumerator StartDrowning()
     {
         yield return new WaitForSeconds(3);
 
-        Destroy(this.gameObject);
+        KillLemon();
     }
+
 
 
     #endregion
 
     #region Public Members
 
+    public bool LemonHasKey
+    {
+        get
+        {
+            return _hasKey;
+        }
+    }
+
+    public void KillLemon()
+    {
+        GameManager.Instance.LemonCount--;
+
+        if (_hasKey) _capturedKeyController.KeyHolderDied();
+
+        Destroy(this.gameObject);
+    }
+
     public void SetSkill(LemonSkillsEnum skill)
     {
-        _currentSkill = skill;
+        CurrentSkill = skill;
+
+        //reset possible flags
+        _buildingStarted = false;
+    }
+
+    public void LemonHitOtherLemon(DirectionLemonHitEnum hitOn, LemonGameController otherLemon)
+    {
+        if(otherLemon.CurrentSkill == LemonSkillsEnum.Blocker && _lastLemonHit != otherLemon)
+        {
+            _lastLemonHit = otherLemon;
+            _primaryDirection = hitOn == DirectionLemonHitEnum.Left ? Vector2.left : Vector2.right;
+        }
+    }
+
+    public void LemonPickedUpKey(KeyController keyController)
+    {
+        _hasKey = true;
+        _capturedKeyController = keyController;
+    }
+
+    public void LemonEntersDoor()
+    {
+        if(_hasKey)
+        {
+            Destroy(_capturedKeyController.gameObject);            
+        }
+
+        GameManager.Instance.LemonsAtHomeForLevelCount++;
+        Destroy(this.gameObject);
+
     }
 
     #endregion
+}
+
+public enum DirectionLemonHitEnum
+{
+    Left,
+    Right
 }
