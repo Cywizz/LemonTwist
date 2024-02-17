@@ -35,6 +35,8 @@ public class DoorController : MonoBehaviour
                     _isOpen = true;
                     _animator.SetTrigger("IsOpening");
                     lemonController.LemonEntersDoor();
+
+                    AudioManager.Instance.PlaySFX(SFXSoundsEnum.DoorOpen);
                 }
             }
             else

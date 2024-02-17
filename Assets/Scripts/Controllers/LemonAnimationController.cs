@@ -22,8 +22,7 @@ public class LemonAnimationController : MonoBehaviour
     {
 
         if (_controller.CurrentSkill == LemonSkillsEnum.None)
-        {
-            //_animator.ResetTrigger("IsBuilding");
+        {            
             _animator.SetTrigger("IsWalking");
 
 
@@ -50,18 +49,35 @@ public class LemonAnimationController : MonoBehaviour
             }
             if(_controller.CurrentSkill == LemonSkillsEnum.Builder) 
             {
+                _animator.ResetTrigger("IsFalling");
                 _animator.ResetTrigger("IsWalking");
-                _animator.SetTrigger("IsBuilding");
+                _animator.SetTrigger("IsBuilding");               
             }
             if(_controller.CurrentSkill == LemonSkillsEnum.Juicer)
             {
                 _animator.SetTrigger("IsJuicing");
+                
             }
             if(_controller.CurrentSkill == LemonSkillsEnum.Digger)
             {
+                _animator.ResetTrigger("IsFalling");
                 _animator.ResetTrigger("IsWalking");
                 _animator.SetTrigger("IsDigging");
             }
+            if (_controller.CurrentSkill == LemonSkillsEnum.Basher)
+            {
+                _animator.ResetTrigger("IsFalling");
+                _animator.ResetTrigger("IsWalking");
+                _animator.SetTrigger("IsBashing");
+            }
+
+        }
+
+
+        if(_controller._environmentCheckController.IsHitByKillObstacle)
+        {
+            _animator.SetTrigger("IsJuicing");
+            
         }
 
 
@@ -73,6 +89,23 @@ public class LemonAnimationController : MonoBehaviour
 
 
     #region Animation Event Handlers
+
+    public void AnimationStarted(string animationName)
+    {
+        if(animationName == "Builder")
+            AudioManager.Instance.PlaySFX(SFXSoundsEnum.Building);
+
+
+        if (animationName == "Juice")
+            AudioManager.Instance.PlaySFX(SFXSoundsEnum.Juicing);
+
+        if (animationName == "Digger")
+            AudioManager.Instance.PlaySFX(SFXSoundsEnum.Digging);
+
+        if(animationName == "Basher")
+            AudioManager.Instance.PlaySFX(SFXSoundsEnum.Bashing);
+
+    }
 
     public void AnimationEnded(string animationName)
     {

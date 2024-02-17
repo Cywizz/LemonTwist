@@ -138,6 +138,12 @@ MonoBehaviour:
   _bounceLayerMask:
     serializedVersion: 2
     m_Bits: 128
+  _killObstacleLayerMask:
+    serializedVersion: 2
+    m_Bits: 256
+  _crumbleLayerMask:
+    serializedVersion: 2
+    m_Bits: 512
   ParentController: {fileID: 0}
   IsGrounded: 0
   IsInWater: 0
@@ -145,6 +151,7 @@ MonoBehaviour:
   IsHittingLemonOnRight: 0
   IsHittingObstacleToLeft: 0
   IsHittingObstacleToRight: 0
+  IsHitByKillObstacle: 0
 --- !u!1 &6824210132162017127
 GameObject:
   m_ObjectHideFlags: 0

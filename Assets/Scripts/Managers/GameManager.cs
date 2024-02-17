@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -13,6 +14,7 @@ public class GameManager : MonoBehaviour
     private LemonGameController _lastSelectedLemon;
     private int _currentSceneIndex = -1;
 
+    
 
     [HideInInspector]
     public LevelDefinition _currentLevelDef;
@@ -48,8 +50,19 @@ public class GameManager : MonoBehaviour
 
         //default
         SetDifficulty(GameDifficultyEnum.Normal);
-        _currentLevelDef = _levels[0];
 
+        var sceneName = SceneManager.GetActiveScene().name;
+
+        if (sceneName == "MainMenu")
+        {
+            _currentLevelDef = _levels[0];
+            _currentSceneIndex = -1;
+        }
+        else
+        {
+            _currentLevelDef = _levels.Where(l => l.name == sceneName).FirstOrDefault();
+            _currentSceneIndex = _currentLevelDef.LevelNo - 1;
+        }
 
     }
 
@@ -96,15 +109,14 @@ public class GameManager : MonoBehaviour
 
     #endregion
 
+    #region Private Members
+
+  
+
+    #endregion
+
     #region Event Handlers
 
-    //private void OnUISkillButtonClicked(LemonSkillsEnum skill)
-    //{
-    //    if(_lastSelectedLemon != null)
-    //    {
-    //        _lastSelectedLemon.SetSkill(skill);
-    //    }
-    //}
 
     public void SetDifficulty(GameDifficultyEnum difficulty)
     {
@@ -120,26 +132,61 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            LemonCount = 1;
+            LemonCount = 5;
         }
+
+        PlayerPrefs.SetString("difficulty", difficulty.ToString());
     }
 
-    public void LoadNextScene()
+    
+
+    public void LoadNextScene(UIController ui)
     {
+        if (_currentSceneIndex > -1)
+        {
+            //save how many lemons left per level
+            PlayerPrefs.SetString(_currentLevelDef.LevelName, LemonCount.ToString());
+        }
+
+        PlayerPrefs.Save(); //save all prefs so far
+
+        if (_currentLevelDef.IsLastLevel)
+        {
+            RestartGame();
+            return;
+        }
+
         _currentSceneIndex++;
 
-        _currentLevelDef = _levels[_currentSceneIndex];
+        _currentLevelDef = _levels[_currentSceneIndex];        
 
         SceneManager.LoadScene(_currentLevelDef.SceneName);
 
         LemonsAtHomeForLevelCount = 0;
+
+        if (_currentLevelDef.LevelNo == 1)
+            ui.ShowTutorial();
     }
 
     public void RestartLevel()
     {
-        SetDifficulty(_currentDifficulty);
+        //SetDifficulty(_currentDifficulty);
 
         LemonsAtHomeForLevelCount = 0;
+
+        var lookUpIndex = 0;
+
+        if(_currentSceneIndex == 0)
+        {
+            SetDifficulty(_currentDifficulty); //reset
+        }
+        else
+        {
+            //check completed previous level for the amount of lemons
+            lookUpIndex = _currentSceneIndex - 1;
+            var previousLevel = _levels[lookUpIndex];
+            LemonCount = int.Parse(PlayerPrefs.GetString(previousLevel.LevelName));
+        }        
 
         SceneManager.LoadScene(_currentLevelDef.SceneName);
 
@@ -147,18 +194,18 @@ public class GameManager : MonoBehaviour
     }
 
     public void RestartGame()
-    {
+    {   
+        
         _currentSceneIndex = -1;
 
+
+
         SetDifficulty(_currentDifficulty);
-
-
       
 
         SceneManager.LoadScene("MainMenu");
 
         LemonsAtHomeForLevelCount = 0;
-
        
     }
 

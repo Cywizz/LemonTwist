@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,6 +15,8 @@ public class EnvironmentCheckController : MonoBehaviour
     [SerializeField] private LayerMask _waterLayerMask;
     [SerializeField] private LayerMask _lemonLayerMask;
     [SerializeField] private LayerMask _bounceLayerMask;
+    [SerializeField] private LayerMask _killObstacleLayerMask;
+    [SerializeField] private LayerMask _crumbleLayerMask;
 
 
     public LemonGameController ParentController;
@@ -30,6 +33,10 @@ public class EnvironmentCheckController : MonoBehaviour
     public bool IsHittingObstacleToLeft;
 
     public bool IsHittingObstacleToRight;
+
+    public bool IsHitByKillObstacle;
+
+    public bool IsOverCrumbleTile;
 
     private void Awake()
     {
@@ -52,8 +59,13 @@ public class EnvironmentCheckController : MonoBehaviour
 
         IsHittingObstacleToLeft = CheckForObstacleHitLeft();
         IsHittingObstacleToRight = CheckForObstacleHitRight();
+
+        IsHitByKillObstacle = CheckForKillObstacleHit();
+
+        IsOverCrumbleTile = CheckIfOverCrumbleTile();
     }
 
+    
 
     private bool CheckGrounding()
     {
@@ -188,8 +200,9 @@ public class EnvironmentCheckController : MonoBehaviour
 
         int lemonCount = _rightTriggerCollider.OverlapCollider(contactFilter, otherLemonsHitList);
 
-        if (lemonCount > 0)
-        {
+        if (lemonCount > 1) //if it is just 1 then the lemon is colliding with itself
+        {  
+
             foreach (var collider in otherLemonsHitList)
             {
                 //it could hit the lemoncontroller direct, or the left or right trigger colliders
@@ -216,7 +229,24 @@ public class EnvironmentCheckController : MonoBehaviour
         return false;
     }
 
-   
+    private bool CheckForKillObstacleHit()
+    {
+        float extraHeight = 0.1f;
+
+        RaycastHit2D raycastHit = Physics2D.BoxCast(_physicsCollider.bounds.center, _physicsCollider.bounds.size, 0f, Vector2.down, extraHeight, _killObstacleLayerMask);
+        
+        return raycastHit.collider != null;
+    }
+
+    private bool CheckIfOverCrumbleTile()
+    {
+        float extraHeight = 0.1f;
+
+        RaycastHit2D raycastHit = Physics2D.BoxCast(_physicsCollider.bounds.center, _physicsCollider.bounds.size, 0f, Vector2.down, extraHeight, _crumbleLayerMask);
+               
+
+        return raycastHit.collider != null;
+    }
 
 
 

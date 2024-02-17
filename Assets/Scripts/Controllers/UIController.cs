@@ -17,6 +17,7 @@ public class UIController : MonoBehaviour
     [SerializeField] TextMeshProUGUI _lemonsAtHomeText;
 
     [SerializeField] TextMeshProUGUI _difficultyDescriptionText;
+    [SerializeField] GameObject _tutorialUI;
 
 
     // Start is called before the first frame update
@@ -28,6 +29,7 @@ public class UIController : MonoBehaviour
             _levelUI.SetActive(false);
             _deathUI.SetActive(false);
             _successUI.SetActive(false);
+            _tutorialUI.SetActive(false);
 
             _difficultyDescriptionText.text = "NORMAL - You start with " + GameManager.Instance.LemonCount + " Lemons";
 
@@ -57,7 +59,7 @@ public class UIController : MonoBehaviour
             _deathUI.SetActive(false);
         }
 
-        if (GameManager.Instance.LemonCount == GameManager.Instance.LemonsAtHomeForLevelCount)
+        if (GameManager.Instance.LemonCount == GameManager.Instance.LemonsAtHomeForLevelCount && GameManager.Instance.LemonsAtHomeForLevelCount != 0)
         {//all lemons at home. - next level
             _successUI.SetActive(true);
         }
@@ -66,13 +68,14 @@ public class UIController : MonoBehaviour
             _successUI.SetActive(false);
         }
 
+        if(Input.GetKeyDown(KeyCode.Space))
+        {
+            PauseClicked();
+        }
+
+       
 
 
-        //var allLemons = FindObjectsOfType<MonoBehaviour>(true).OfType<LemonGameController>().ToArray();
-        //if(allLemons.Length == 0 && GameManager.Instance.LemonCount > 0)
-        //{
-
-        //}
 
     }
 
@@ -105,13 +108,13 @@ public class UIController : MonoBehaviour
 
     public void StartGame()
     {
-        GameManager.Instance.LoadNextScene();
+        GameManager.Instance.LoadNextScene(this);
         _levelUI.SetActive(true);
         _mainMenuUI.SetActive(false);
         _deathUI.SetActive(false);
         _successUI.SetActive(false);
 
-        PlayerPrefs.Save(); 
+       
 
         AudioManager.Instance.PlaySFX(SFXSoundsEnum.ButtonPop);
     }
@@ -136,22 +139,49 @@ public class UIController : MonoBehaviour
         GameManager.Instance.RestartGame();
     }
 
+    public void ExitGame()
+    {
+        Application.Quit();
+    }
+
     public void NextLevel()
     {
+        if (GameManager.Instance._currentLevelDef.IsLastLevel)
+        {
+            _levelUI.SetActive(false);
+            _mainMenuUI.SetActive(true);
+            _deathUI.SetActive(false);
+            _successUI.SetActive(false);
+        }
+        else
+        {
+            _levelUI.SetActive(true);
+            _mainMenuUI.SetActive(false);
+            _deathUI.SetActive(false);
+            _successUI.SetActive(false);
+        }
 
-        _levelUI.SetActive(true);
-        _mainMenuUI.SetActive(false);
-        _deathUI.SetActive(false);
-        _successUI.SetActive(false);
+        AudioManager.Instance.MusicSource.volume = PlayerPrefs.GetFloat("musicvolume", 0.8f);
 
-        GameManager.Instance.LoadNextScene();
+        GameManager.Instance.LoadNextScene(this);
 
     }
 
     public void PauseClicked()
     {
         Time.timeScale = Time.timeScale == 0 ? 1 : 0;
+
+        _tutorialUI.SetActive(false);
     }
+
+    public void ShowTutorial()
+    {
+        _tutorialUI.SetActive(true);
+
+        Time.timeScale = 0;
+    }
+
+
 
 
 

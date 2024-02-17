@@ -74,7 +74,7 @@ SpriteRenderer:
   m_SortingLayerID: 1649293803
   m_SortingLayer: 1
   m_SortingOrder: 0
-  m_Sprite: {fileID: 3612525282000981152, guid: efb01cbe0e359024cb31e0c6adaf8faa, type: 3}
+  m_Sprite: {fileID: 6780286104894559622, guid: c28d9b092f9d4c241aa97890b2f980ed, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -130,7 +130,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4748950791145701731}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -18.39, y: 6.89, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -184,5 +184,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _lemonPrefab: {fileID: 7562065249120544465, guid: 9ae97ca294551d54497e46c495d96ba6, type: 3}
-  _numberLemonsToSpawn: 10
-  _spawnFrequencySeconds: 3

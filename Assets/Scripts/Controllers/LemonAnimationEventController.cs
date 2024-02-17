@@ -26,10 +26,31 @@ public class LemonAnimationEventController : MonoBehaviour
 
     #region Animation Events
 
+    public void Juice_Started()
+    {
+        _animationController.AnimationStarted("Juice");
+    }
+
+    public void Builder_Started()
+    {
+        _animationController.AnimationStarted("Builder");
+    }
+
     public void Juice_End()
     {
         _animationController.AnimationEnded("Juice");
     }
+
+    private void Digger_Started()
+    {
+        _animationController.AnimationStarted("Digger");
+    }
+
+    private void Basher_Started()
+    {
+        _animationController.AnimationStarted("Basher");
+    }
+
 
     #endregion
 
