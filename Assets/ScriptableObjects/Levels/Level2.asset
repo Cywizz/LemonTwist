@@ -12,7 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77c3b6360260b7f4ea04f50ad90eb014, type: 3}
   m_Name: Level2
   m_EditorClassIdentifier: 
+  LevelNo: 2
   LevelName: Level 2
   SceneName: Level2
   SpawnFrequencyInSeconds: 3
   LemonSpeed: 3
+  SpawnDirection: {x: -1, y: 0}
+  SpawnLeftAndRight: 0
+  Skills: 010000000200000003000000
+  HasReward: 1
+  RewardsItemSprite: {fileID: 21300000, guid: 724b6582dbda1de4ba6026ff0ec8a48e, type: 3}
+  RewardsItemText: You see a shovel against the wall...
+  RewardSkillSprite: {fileID: 6703322595250169051, guid: f101cef2a33c6644eb724620a6b48677, type: 3}
+  RewardSkillText: Digger Unlocked!
+  RewardSkillSFX: 6

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,6 +18,7 @@ public class LemonGameController : MonoBehaviour
     private bool _drowningStarted;
     private bool _buildingStarted;
     private bool _diggingStarted;
+    private bool _bashingStarted;
     private LemonGameController _lastLemonHit;
 
     private bool _hasKey;
@@ -35,8 +37,7 @@ public class LemonGameController : MonoBehaviour
 
         _justSpawned = true;
         _drowningStarted = false;
-        CurrentSkill = LemonSkillsEnum.None;
-        _primaryDirection = Vector2.right;
+        CurrentSkill = LemonSkillsEnum.None;       
         _movementSpeed = GameManager.Instance._currentLevelDef.LemonSpeed;
     }
 
@@ -53,9 +54,7 @@ public class LemonGameController : MonoBehaviour
         if (CurrentSkill == LemonSkillsEnum.None)
         {           
 
-            var direction = _primaryDirection;            
-
-            var currentPosition = new Vector2(transform.position.x, transform.position.y);
+            var direction = _primaryDirection;         
 
             if (_environmentCheckController.IsGrounded)
             {
@@ -77,9 +76,11 @@ public class LemonGameController : MonoBehaviour
 
                 if (_justSpawned) //makes it jump side ways out of the tree
                 {
-                    direction = (Vector2.right + Vector2.up) * 0.5f;
+                    //direction = (_primaryDirection) * _movementSpeed;
+                    direction = (direction + Vector2.up) * 0.5f;
 
-                    _rb.AddForce(direction, ForceMode2D.Impulse);
+                    _rb.AddForce(direction, ForceMode2D.Force);
+                    //_rb.velocity = direction;
                 }
                 else
                 {
@@ -100,9 +101,11 @@ public class LemonGameController : MonoBehaviour
                 
             }
 
-
-
-
+            if(_environmentCheckController.IsOverCrumbleTile)
+            {
+                //_rb.velocity = new Vector2(direction.x * _movementSpeed, direction.y * _movementSpeed);
+                SkillManager.Instance.LemonOverCrumbleTile(this);
+            }
 
         }
 
@@ -135,12 +138,27 @@ public class LemonGameController : MonoBehaviour
 
         }
 
+        if(CurrentSkill == LemonSkillsEnum.Basher)
+        {
+            _rb.velocity = Vector2.zero;
+
+            if(_bashingStarted == false)
+            {
+                _bashingStarted = true;
+                StartCoroutine(StartBashingProcess());
+            }
+        }
+
     }
+
+   
 
 
     #endregion
 
     #region Local Members
+
+
 
     private IEnumerator StartDiggingProcess()
     {
@@ -161,7 +179,14 @@ public class LemonGameController : MonoBehaviour
         _drowningStarted = true;
         StartCoroutine(StartDrowning());
     }
-       
+
+    private IEnumerator StartBashingProcess()
+    {
+        yield return new WaitForSeconds(1f);
+
+        SkillManager.Instance.Bash(this);
+    }
+
 
     private IEnumerator StartDrowning()
     {
@@ -175,6 +200,11 @@ public class LemonGameController : MonoBehaviour
     #endregion
 
     #region Public Members
+
+    public void SetPrimaryDirection(Vector2 direction)
+    {
+        _primaryDirection = direction;
+    }
 
     public bool LemonHasKey
     {
@@ -199,14 +229,19 @@ public class LemonGameController : MonoBehaviour
 
         //reset possible flags
         _buildingStarted = false;
+        _diggingStarted = false;
+        _bashingStarted = false;
     }
 
-    public void LemonHitOtherLemon(DirectionLemonHitEnum hitOn, LemonGameController otherLemon)
+    public void LemonHitOtherLemon(DirectionLemonHitEnum sideOtherLemonhitOn, LemonGameController otherLemon)
     {
-        if(otherLemon.CurrentSkill == LemonSkillsEnum.Blocker && _lastLemonHit != otherLemon)
+        if(otherLemon.CurrentSkill == LemonSkillsEnum.Blocker)
         {
+            _primaryDirection = sideOtherLemonhitOn == DirectionLemonHitEnum.Left ? Vector2.left : Vector2.right;
+
             _lastLemonHit = otherLemon;
-            _primaryDirection = hitOn == DirectionLemonHitEnum.Left ? Vector2.left : Vector2.right;
+
+            
         }
     }
 
@@ -214,6 +249,8 @@ public class LemonGameController : MonoBehaviour
     {
         _hasKey = true;
         _capturedKeyController = keyController;
+
+        AudioManager.Instance.PlaySFX(SFXSoundsEnum.KeyPickup);
     }
 
     public void LemonEntersDoor()
@@ -224,6 +261,9 @@ public class LemonGameController : MonoBehaviour
         }
 
         GameManager.Instance.LemonsAtHomeForLevelCount++;
+
+        AudioManager.Instance.PlaySFX(SFXSoundsEnum.EnterDoor);
+
         Destroy(this.gameObject);
 
     }
