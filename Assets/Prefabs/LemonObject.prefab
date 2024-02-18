@@ -152,6 +152,7 @@ MonoBehaviour:
   IsHittingObstacleToLeft: 0
   IsHittingObstacleToRight: 0
   IsHitByKillObstacle: 0
+  IsOverCrumbleTile: 0
 --- !u!1 &6824210132162017127
 GameObject:
   m_ObjectHideFlags: 0
@@ -470,9 +471,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c3648a9986210b4b841bee82e4cf214, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _environmentCheckController: {fileID: 0}
   CurrentSkill: 0
   _primaryDirection: {x: 0, y: 0}
-  _environmentCheckController: {fileID: 0}
+  HoverCursor_Ok: {fileID: 2800000, guid: 8ea795c067613354898068091ffc7130, type: 3}
+  HoverCursor_Invalid: {fileID: 2800000, guid: 2a2b4775272c890448e1bd6239fdfc84, type: 3}
 --- !u!114 &1614491301979433958
 MonoBehaviour:
   m_ObjectHideFlags: 0

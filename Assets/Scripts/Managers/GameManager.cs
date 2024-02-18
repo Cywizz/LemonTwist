@@ -8,11 +8,14 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
 
-    [SerializeField] LevelDefinition[] _levels;   
+    [SerializeField] LevelDefinition[] _levels;
+    public Texture2D GameDefaultCursor;
 
     private Camera _camera;
     private LemonGameController _lastSelectedLemon;
     private int _currentSceneIndex = -1;
+
+    
 
     
 
@@ -69,7 +72,7 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-       
+        Cursor.SetCursor(GameDefaultCursor, Vector2.zero, CursorMode.ForceSoftware);
         
 
     }
@@ -78,24 +81,47 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        var mouseIsOverLemon = false;
+
+        //check if the mouse is over a lemon
+        var rayHit = Physics2D.GetRayIntersection(_camera.ScreenPointToRay(Input.mousePosition));
+        if (!rayHit.collider) return;
+
+        var lemonSelected = rayHit.collider.gameObject.GetComponent<LemonGameController>();
+
+        if(lemonSelected != null) 
+        {           
+            mouseIsOverLemon = true;
+        }
+        else
         {
-            var rayHit = Physics2D.GetRayIntersection(_camera.ScreenPointToRay(Input.mousePosition));
-            if (!rayHit.collider) return;
+            mouseIsOverLemon = false;
+        }   
+                
 
-            var lemonSelected = rayHit.collider.gameObject.GetComponent<LemonGameController>();
-            if (lemonSelected != null && SkillManager.Instance.SelectedSkill != LemonSkillsEnum.None)
+
+        if (Input.GetMouseButtonDown(0) && mouseIsOverLemon)
+        {
+            //var rayHit = Physics2D.GetRayIntersection(_camera.ScreenPointToRay(Input.mousePosition));
+            //if (!rayHit.collider) return;
+
+            //var lemonSelected = rayHit.collider.gameObject.GetComponent<LemonGameController>();
+            bool canBeGivenSkill = true;
+
+            if (SkillManager.Instance.SelectedSkill == LemonSkillsEnum.None) canBeGivenSkill = false; //no skill selected
+
+            if (lemonSelected.LemonHasKey) canBeGivenSkill = false; //key carrier can not get a skill
+
+            if (lemonSelected.CurrentSkill == LemonSkillsEnum.Blocker && SkillManager.Instance.SelectedSkill != LemonSkillsEnum.Juicer) canBeGivenSkill = false; //the blocker can not be given a skill, unless it is the juicer
+
+            if (canBeGivenSkill)
             {
-                //key carrier can not get a skill
-                if (lemonSelected.LemonHasKey == false)
-                {
-                    _lastSelectedLemon = lemonSelected;
-                    _lastSelectedLemon.SetSkill(SkillManager.Instance.SelectedSkill);
+                _lastSelectedLemon = lemonSelected;
+                _lastSelectedLemon.SetSkill(SkillManager.Instance.SelectedSkill);
 
-                    AudioManager.Instance.PlaySFX(SFXSoundsEnum.LemonSelected);
-                }
+                AudioManager.Instance.PlaySFX(SFXSoundsEnum.LemonSelected);
             }
-          
+
 
         }
 
