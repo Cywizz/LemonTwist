@@ -44,53 +44,48 @@ public class HighscoreController : MonoBehaviour
 
 
         if (level1Score != "-1")
-        {
-            _level1Text.gameObject.SetActive(true);
+        {            
             _level1Text.text = "Level 1 - " + level1Score + " Lemons Alive";
         }
         else
         {
-            _level1Text.gameObject.SetActive(false);
+            _level1Text.text = "Level 1 - ???";
         }
 
         if (level2Score != "-1")
-        {
-            _level2Text.gameObject.SetActive(true);
+        {         
             _level2Text.text = "Level 2 - " + level2Score + " Lemons Alive";
         }
         else
         {
-            _level2Text.gameObject.SetActive(false);
+            _level2Text.text = "Level 2 - ???";
         }
 
         if (level3Score != "-1")
-        {
-            _level3Text.gameObject.SetActive(true);
+        {            
             _level3Text.text = "Level 3 - " + level3Score + " Lemons Alive";
         }
         else
         {
-            _level3Text.gameObject.SetActive(false);
+            _level3Text.text = "Level 3 - ???";
         }
 
         if (level4Score != "-1")
-        {
-            _level4Text.gameObject.SetActive(true);
+        {            
             _level4Text.text = "Level 4 - " + level4Score + " Lemons Alive";
         }
         else
         {
-            _level4Text.gameObject.SetActive(false);
+            _level4Text.text = "Level 4 - ???";
         }
 
         if (level5Score != "-1")
-        {
-            _level5Text.gameObject.SetActive(true);
+        {            
             _level5Text.text = "Level 5 - " + level5Score + " Lemons Alive";
         }
         else
         {
-            _level5Text.gameObject.SetActive(false);
+            _level5Text.text = "Level 5 - ???";
         }
     }
 

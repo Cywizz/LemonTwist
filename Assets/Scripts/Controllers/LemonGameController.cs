@@ -1,26 +1,27 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
 public class LemonGameController : MonoBehaviour
 {
 
-    private float _movementSpeed;    
-    public LemonSkillsEnum CurrentSkill;
-    public Vector2 _primaryDirection;
-
-    private Rigidbody2D _rb;
-
     [HideInInspector]
     public EnvironmentCheckController _environmentCheckController;
+    public LemonSkillsEnum CurrentSkill;
+    public Vector2 _primaryDirection;
+    public Texture2D HoverCursor_Ok;
+    public Texture2D HoverCursor_Invalid;
+
+    private float _movementSpeed;    
+    private Rigidbody2D _rb;
     private bool _justSpawned;
     private bool _drowningStarted;
     private bool _buildingStarted;
     private bool _diggingStarted;
     private bool _bashingStarted;
     private LemonGameController _lastLemonHit;
-
     private bool _hasKey;
     private KeyController _capturedKeyController;
 
@@ -151,7 +152,38 @@ public class LemonGameController : MonoBehaviour
 
     }
 
-   
+    private void OnMouseEnter()
+    {
+        if(SkillManager.Instance.SelectedSkill == LemonSkillsEnum.None)
+        {
+            Cursor.SetCursor(HoverCursor_Invalid, Vector2.zero, CursorMode.ForceSoftware);            
+        }
+        else
+        {
+            if (CurrentSkill == LemonSkillsEnum.Blocker && SkillManager.Instance.SelectedSkill != LemonSkillsEnum.Juicer)
+            {
+                Cursor.SetCursor(HoverCursor_Invalid, Vector2.zero, CursorMode.ForceSoftware);
+            }
+            else
+            {
+                if (LemonHasKey)
+                {
+                    Cursor.SetCursor(HoverCursor_Invalid, Vector2.zero, CursorMode.ForceSoftware);
+                }
+                else
+                {
+                    Cursor.SetCursor(HoverCursor_Ok, Vector2.zero, CursorMode.ForceSoftware);
+                }
+            }
+        }
+
+        
+    }
+
+    private void OnMouseExit()
+    {
+        Cursor.SetCursor(GameManager.Instance.GameDefaultCursor, Vector2.zero, CursorMode.ForceSoftware);
+    }
 
 
     #endregion
